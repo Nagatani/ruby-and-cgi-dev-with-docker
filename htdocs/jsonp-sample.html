@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h1>ラーメン屋の検索結果</h1>
+  <ul></ul>
+
+
+<script>
+function fetchJsonp(url) {
+  const urlObj = new URL(url)
+  // クエリパラメータに"callback"がない場合にのみ追加
+  if (!urlObj.searchParams.has("callback")) {
+    urlObj.searchParams.append("callback", "handleJsonpResponse")
+  }
+  // 動的にscriptタグを作成
+  const script = document.createElement("script")
+  // src属性にCallback関数名付きのJSONP URLを設定
+  script.src = urlObj.toString() // URLオブジェクトから完全なURLを取得
+  // scriptタグをbodyに追加
+  document.body.appendChild(script)
+  // 追加されたscriptタグ内のソースコードは、Webサービスから取得されたJSONデータを引数として
+  // handleJsonpResponse関数が呼ばれる
+}
+function handleJsonpResponse(data) {
+  console.log("Received data:", data)
+  // dataはJSONP APIから返されて、scriptタグのsrc経由でオブジェクトに変換されたデータ
+  const ul = document.querySelector('ul')
+  data.Feature.forEach(element => {
+    const li = document.createElement('li')
+    li.textContent = `${ element.Name }: ${ element.Geometry.Coordinates }`
+    const anchor = document.createElement('a')
+    const latlang = element.Geometry.Coordinates.split(",")
+    // console.log(latlang)
+    anchor.href = `https://maps.google.com/maps?ll=${latlang[1]},${ latlang[0] }`
+    anchor.innerText = "Google Maps"
+    anchor.target = "__blank"
+    li.appendChild(anchor)
+    ul.appendChild(li)
+  })
+}
+const jsonpApiUrl = `https://map.yahooapis.jp/search/local/V1/localSearch?appid=dj00aiZpPUlRaTRpZGZxMlZ0QiZzPWNvbnN1bWVyc2VjcmV0Jng9NzM-&query=%E3%83%A9%E3%83%BC%E3%83%A1%E3%83%B3&output=json`
+fetchJsonp(jsonpApiUrl)
+</script>
+</body>
+</html>

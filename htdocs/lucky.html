@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+  <h1>ラッキーアイテム教えます</h1>
+  <label for="name">名前：</label><input type="text" id="name"></input>
+  <button id="get_lucky">教えて</button>
+  <div id="message"></div>
+
+<script>
+// JSONPが呼ぶ関数
+function handleJsonpResponse(data) {
+  console.log("Received data:", data)
+  const message = `${ data.name }さんのラッキーアイテムは, <h3>「${ data.lucky }」</h3>です。`
+  document.getElementById("message").innerHTML = message
+}
+function fetchJsonp(url) {
+  const urlObj = new URL(url)
+  if (!urlObj.searchParams.has("callback")) {
+    urlObj.searchParams.append("callback", "handleJsonpResponse")
+  }
+  const script = document.createElement("script")
+  script.src = urlObj.toString()
+  document.body.appendChild(script)
+}
+// ボタンを押したときに呼ばれるようにする関数を作成する
+document.getElementById("get_lucky").addEventListener("click", (ev) => {
+  const name = document.getElementById("name").value
+  // 入力されたnameをURLに埋め込む（serchParamsを使ってもOK）
+  const jsonpApiUrl = `http://localhost:8080/cgi-bin/lucky.rb?name=${ name }`
+  fetchJsonp(jsonpApiUrl)
+})
+</script>
+</body>
+</html>
